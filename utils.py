@@ -11,11 +11,11 @@ from skimage.io import imread
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from tqdm import tqdm
 
 from inputs import get_gamepad
 import math
 import threading
-
 
 def resize_image(img):
     im = resize(img, (Sample.IMG_H, Sample.IMG_W, Sample.IMG_D))
@@ -24,17 +24,17 @@ def resize_image(img):
 
 
 class Screenshot(object):
-    SRC_W = 640
-    SRC_H = 480
+    SRC_W = 850
+    SRC_H = 530
     SRC_D = 3
 
-    OFFSET_X = 0
-    OFFSET_Y = 0
+    OFFSET_X = 200
+    OFFSET_Y = 50
 
 
 class Sample:
-    IMG_W = 200
-    IMG_H = 66
+    IMG_W = 250
+    IMG_H = 166
     IMG_D = 3
 
 
@@ -74,7 +74,7 @@ class XboxController(object):
         x = self.LeftJoystickX
         y = self.LeftJoystickY
         a = self.A
-        b = self.X # b=1, x=2
+        b = self.B # b=1, x=2
         rb = self.RightBumper
         return [x, y, a, b, rb]
 
@@ -99,13 +99,13 @@ class XboxController(object):
                     self.LeftBumper = event.state
                 elif event.code == 'BTN_TR':
                     self.RightBumper = event.state
-                elif event.code == 'BTN_SOUTH':
+                elif event.code == 'BTN_EAST':
                     self.A = event.state
                 elif event.code == 'BTN_NORTH':
                     self.X = event.state
                 elif event.code == 'BTN_WEST':
                     self.Y = event.state
-                elif event.code == 'BTN_EAST':
+                elif event.code == 'BTN_SOUTH':
                     self.B = event.state
                 elif event.code == 'BTN_THUMBL':
                     self.LeftThumb = event.state
@@ -153,8 +153,11 @@ class Data(object):
 
 def load_sample(sample):
     image_files = np.loadtxt(sample + '/data.csv', delimiter=',', dtype=str, usecols=(0,))
-    joystick_values = np.loadtxt(sample + '/data.csv', delimiter=',', usecols=(1,2,3,4,5))
-    return image_files, joystick_values
+    joystick_values = np.loadtxt(sample + '/data.csv', delimiter=',', usecols=(1,))
+    joystick_values_new = []
+    for jv in joystick_values:
+        joystick_values_new.append(jv*1.2)
+    return image_files, joystick_values_new
 
 def load_imgs(sample):
     image_files = np.loadtxt(sample + '/data.csv', delimiter=',', dtype=str, usecols=(0,))
@@ -190,13 +193,11 @@ def viewer(sample):
         # plot
         plt.subplot(122)
         plt.plot(range(i,i+len(plotData)), x[:,0], 'r')
-        plt.hold(True)
         plt.plot(range(i,i+len(plotData)), x[:,1], 'b')
         plt.plot(range(i,i+len(plotData)), x[:,2], 'g')
         plt.plot(range(i,i+len(plotData)), x[:,3], 'k')
         plt.plot(range(i,i+len(plotData)), x[:,4], 'y')
         plt.draw()
-        plt.hold(False)
 
         plt.pause(0.0001) # seconds
         i += 1
@@ -205,32 +206,34 @@ def viewer(sample):
 # prepare training data
 def prepare(samples):
     print("Preparing data")
-
+    num_samples = 0
     for sample in samples:
         image_files = load_imgs(sample)
         num_samples += len(image_files)
 
     print(f"There are {num_samples} samples")
 
-    X = np.empty(shape=(num_samples, Sample.IMG_H, Sample.IMG_W, 3), dtype=np.uint8)
+    X = []
     y = []
 
-    for idx, sample in enumerate(samples):
+    for sample in samples:
         print(sample)
 
         # load sample
         image_files, joystick_values = load_sample(sample)
 
-        # add joystick values to y
-        y.append(joystick_values)
-
-        # load, prepare and add images to X
-        for image_file in image_files:
-            image = imread(image_file)
+        joystick_values_generated = []
+        for i in tqdm(range(len(image_files))):
+            jv = joystick_values[i]
+            i = image_files[i]
+            image = imread(i)
             vec = resize_image(image)
-            X[idx] = vec
+            X.append(vec)
+            joystick_values_generated.append(jv)
+        y.append(joystick_values_generated)
 
     print("Saving to file...")
+    X = np.asarray(X)
     y = np.concatenate(y)
 
     np.save("data/X", X)

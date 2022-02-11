@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
-from utils import resize_image, XboxController
+from utils import resize_image, XboxController, Screenshot
 from termcolor import cprint
+import mss
+import cv2
+import pyvjoy
+import time
+from matplotlib import pyplot as plt
+from datetime import datetime
+from PIL import Image
 
-import gym
-import gym_mupen64plus
 from train import create_model
 import numpy as np
 
@@ -40,11 +45,11 @@ class Actor(object):
 
         ### calibration
         output = [
-            int(joystick[0] * 80),
-            int(joystick[1] * 80),
-            int(round(joystick[2])),
-            int(round(joystick[3])),
-            int(round(joystick[4])),
+            float(joystick[0]),
+            0,
+            1,
+            0,
+            0,
         ]
 
         ### print to console
@@ -55,31 +60,51 @@ class Actor(object):
 
         return output
 
+def get_screenshot():
+        # Get raw pixels from the screen
+        sct = mss.mss()
+        sct_img = sct.grab({"top": Screenshot.OFFSET_Y,
+                            "left": Screenshot.OFFSET_X,
+                            "width": Screenshot.SRC_W,
+                            "height": Screenshot.SRC_H})
+
+        # Create the Image
+        img = np.array(sct_img)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return img
+
+def play(action, vjoy, old_time):
+    x_value = int(16384 * action[0] + 16384)
+    y_value = int(16384 * action[1] + 16384)
+    vjoy.data.wAxisX = int(hex(x_value), 16)
+    vjoy.data.wAxisY = int(hex(y_value), 16)
+
+    now = int(round(time.time() * 1000))
+    if now - old_time > 200 :
+        #vjoy.data.lButtons = 1 - vjoy.data.lButtons
+        vjoy.data.lButtons = 1
+        vjoy.update()
+        return now
+    vjoy.update()
+    return old_time
 
 if __name__ == '__main__':
-    env = gym.make('Mario-Kart-Royal-Raceway-v0')
-
-    obs = env.reset()
-    env.render()
-    print('env ready!')
 
     actor = Actor()
+    old_time = int(round(time.time() * 1000))
+    vjoy = pyvjoy.VJoyDevice(1)
+    vjoy.data.wAxisX = 0x4000
+    vjoy.data.wAxisY= 0x4000
+    vjoy.data.lButtons = 0
+    vjoy.update()
     print('actor ready!')
 
-    print('beginning episode loop')
-    total_reward = 0
-    end_episode = False
-    while not end_episode:
-        action = actor.get_action(obs)
-        obs, reward, end_episode, info = env.step(action)
-        env.render()
-        total_reward += reward
+    print('beginning loop')
 
-    print('end episode... total reward: ' + str(total_reward))
-
-    obs = env.reset()
-    print('env ready!')
+    while True:
+        screenshot = get_screenshot()
+        action = actor.get_action(screenshot)
+        old_time = play(action, vjoy, old_time)
 
     input('press <ENTER> to quit')
 
-    env.close()

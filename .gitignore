@@ -7,3 +7,4 @@ model.ckpt*
 *.gif
 *.ogv
 *.mp4
+*.h5

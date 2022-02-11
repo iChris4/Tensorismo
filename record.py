@@ -9,6 +9,7 @@ matplotlib.use('TkAgg')
 from datetime import datetime
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigCanvas
+import random
 
 from PIL import ImageTk, Image
 
@@ -29,9 +30,9 @@ else:
 
 from utils import Screenshot, XboxController
 
-IMAGE_SIZE = (320, 240)
-IDLE_SAMPLE_RATE = 1500
-SAMPLE_RATE = 200
+IMAGE_SIZE = (640, 480)
+IDLE_SAMPLE_RATE = 50
+SAMPLE_RATE = 50
 
 class MainWindow():
     """ Main frame of the application
@@ -42,7 +43,7 @@ class MainWindow():
         self.sct = mss.mss()
 
         self.root.title('Data Acquisition')
-        self.root.geometry("660x325")
+        self.root.geometry("1280x720")
         self.root.resizable(False, False)
 
         # Init controller
@@ -87,7 +88,7 @@ class MainWindow():
         self.outputDirStrVar = tk.StringVar()
         self.txt_outputDir = tk.Entry(textframe, textvariable=self.outputDirStrVar, width=100)
         self.txt_outputDir.pack(side=tk.LEFT)
-        self.outputDirStrVar.set("samples/" + datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))
+        self.outputDirStrVar.set("samples/" + datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
         self.record_button = ttk.Button(bottom_half, text="Record", command=self.on_btn_record)
         self.record_button.pack(side = tk.LEFT, padx=5)
@@ -118,8 +119,14 @@ class MainWindow():
         self.update_plot()
 
         if self.recording == True:
-            self.save_data()
-            self.t += 1
+            # save only X% of driving straigth to reduce bias
+            if self.controller_data[0] == 0 :
+                if random.random() < 2 :
+                    self.save_data()
+                    self.t += 1
+            else :
+                self.save_data()
+                self.t += 1
 
 
     def take_screenshot(self):
