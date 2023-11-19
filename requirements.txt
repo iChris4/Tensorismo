@@ -6,10 +6,12 @@ scikit-image
 termcolor
 keras
 h5py
-tensorflow-gpu
 Pillow
 tensorflow
 sklearn
 opencv-python
+salsa20
 tqdm
-vjoy
+pygetwindow
+pyautogui
+vgamepad
