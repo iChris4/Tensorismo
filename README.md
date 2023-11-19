@@ -16,12 +16,13 @@ Dependencies
 
 Recording Samples
 -----------------
-1. Start a remote play session and start a race
-2. Make sure you have a joystick connected
-3. Run `record_chiaki.py` or `record.py`
-4. Make sure the graph responds to joystick input.
-5. Make sure the image is captured by the program (top left corner for `record.py`)
-6. Press record and play through the course. You can trim some images off the front and back of the data you collect afterwards (by removing lines in `samples/data.csv`).
+1. Start a remote play session with Chiaki (In the settings, it's best to change the resolution to 360p) 
+2. Start a race
+3. Make sure you have a joystick connected
+4. Run `record_chiaki.py` for the programm to automatically select the window or `record.py` to manually center the window 
+5. Make sure the graph responds to joystick input.
+6. Make sure the image is captured by the program (top left corner for `record.py`)
+7. Press record and play through the course. You can trim some images off the front and back of the data you collect afterwards (by removing lines in `samples/data.csv`).
 
 
 Notes
