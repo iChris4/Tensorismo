@@ -56,8 +56,7 @@ The `train.py` program will train a model using Google's TensorFlow framework an
 --------
 Open and edit the `gt7telemetry` file to enter the ip to your console on the corresponding line
 
-By default the Restart will occure after 30 laps, you can change it to any lap by putting the last lap +1 
-exemple ( 30 laps = 31 )
+By default the Restart will occure after 30 laps, you can change it to any lap by putting the last lap +1 ( 30 laps = 31 )
 
 Launch `gt7telemetry` before `play.py` or the input of the IA will not be overide and the restart input sequence will fail
 
