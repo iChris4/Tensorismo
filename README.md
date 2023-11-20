@@ -1,9 +1,11 @@
 Tensorismo
 ==========
 
-Self-driving for Gran Turismo 7 with TensorFlow
+Self-driving for GT7 with TensorFlow
 
-I'm not responsable for any action that could be taken by Sony or Polyphony Digital if you use this programm  
+I'm not responsable for any action that could be taken by Sony or Polyphony Digital if you use this programm. 
+
+For Educational purpose only
 
 
 Dependencies
@@ -17,11 +19,11 @@ Dependencies
 Recording Samples
 -----------------
 1. Start a remote play session with Chiaki (In the settings, it's best to change the resolution to 360p) 
-2. Start a race
+2. Start a simple race
 3. Make sure you have a joystick connected
 4. Run `record_chiaki.py` for the programm to automatically select the window or `record.py` to manually center the window 
 5. Make sure the graph responds to joystick input.
-6. Make sure the image is captured by the program (top left corner for `record.py`)
+6. Make sure the image is captured by the program (top left corner of the screen for `record.py`)
 7. Press record and play through the course. You can trim some images off the front and back of the data you collect afterwards (by removing lines in `samples/data.csv`).
 
 
